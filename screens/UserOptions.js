@@ -1,4 +1,3 @@
-// UserOptions.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Image, ScrollView, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,20 +19,8 @@ const UserOptions = () => {
     }
   };
 
-  // const pickFaceImage = async () => {
-  //     let result = await ImagePicker.launchImageLibraryAsync({
-  //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //         quality: 1,
-  //     });
-
-  //     if (!result.canceled) {
-  //         setFacePhoto(result.assets[0]);
-  //     }
-  // };
-
   const handleSubmit = () => {
     console.log('UserID Submitted:', userName);
-    // You can add your submit logic here
   };
 
   return (
