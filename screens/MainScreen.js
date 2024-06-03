@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import COLORS from '../constants/colors';
 
@@ -20,7 +21,7 @@ const MainScreen = () => {
 
     webSocket.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log(data)
+      console.log(data);
       if (data.image_url && data.image_name !== currentImage.current) {
         setPhotoUrl(data.image_url);
         setMessage('This person is at your door.');
@@ -40,9 +41,42 @@ const MainScreen = () => {
     };
 
     return () => {
-      webSocket.current.close();
+      if (webSocket.current) {
+        webSocket.current.close();
+      }
     };
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (webSocket.current) {
+        webSocket.current.onopen = () => {
+          console.log('WebSocket connection opened');
+        };
+  
+        webSocket.current.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          console.log(data);
+          if (data.image_url && data.image_name !== currentImage.current) {
+            setPhotoUrl(data.image_url);
+            setMessage('This person is at your door.');
+            currentImage.current = data.image_name;
+          } else if (!data.image_url) {
+            setPhotoUrl(null);
+            setMessage('No one is at your door.');
+          }
+        };
+  
+        webSocket.current.onclose = () => {
+          console.log('WebSocket connection closed');
+        };
+  
+        webSocket.current.onerror = (error) => {
+          console.error('WebSocket error:', error);
+        };
+      }
+    }, [])
+  );
 
   const handleDecision = async (decision) => {
     try {
@@ -107,8 +141,8 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   photoContainer: {
-    width: 300,
-    height: 300,
+    width: 330,
+    height: 310,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -116,8 +150,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   image: {
-    width: '100%',
-    height: '110%',
+    width: 330,
+    height: 330,
     borderRadius: 10,
   },
   noPhotoText: {
