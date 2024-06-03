@@ -8,46 +8,40 @@ const MainScreen = () => {
   const [photoUrl, setPhotoUrl] = useState(null);
   const [message, setMessage] = useState('No one is at your door.');
   const currentImage = useRef("initial");
+  const webSocket = useRef(null);
 
   useEffect(() => {
-    let intervalId;
+    // Set up WebSocket connection
+    webSocket.current = new WebSocket('wss://dpklgkhpz9.execute-api.eu-west-2.amazonaws.com/development/');
 
-    // Function to fetch the photo from AWS Lambda using axios
-    const fetchPhoto = async () => {
-      try {
-        const response = await axios.get('https://ygp3dwqpaa.execute-api.eu-west-2.amazonaws.com/dev/image', {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = response.data;
-        console.log(data.image_name, currentImage.current);
-        if (data.image_url && data.image_name !== currentImage.current) {
-          console.log(data.image_url);
-          setPhotoUrl(data.image_url);
-          setMessage('This person is at your door.');
-          currentImage.current = data.image_name;
-        } else if (!data.image_url) {
-          setPhotoUrl(null);
-          setMessage('No one is at your door.');
-          // currentImage.current = null;
-        }
-      } catch (error) {
-        console.error('Error fetching photo:', error);
+    webSocket.current.onopen = () => {
+      console.log('WebSocket connection opened');
+    };
+
+    webSocket.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data)
+      if (data.image_url && data.image_name !== currentImage.current) {
+        setPhotoUrl(data.image_url);
+        setMessage('This person is at your door.');
+        currentImage.current = data.image_name;
+      } else if (!data.image_url) {
         setPhotoUrl(null);
-        setMessage('Error fetching photo.');
-        currentImage.current = null;
+        setMessage('No one is at your door.');
       }
     };
 
-    // Fetch photo initially
-    fetchPhoto();
+    webSocket.current.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
 
-    // Set up polling
-    intervalId = setInterval(fetchPhoto, 2000); // Poll every 2 seconds (2000)
+    webSocket.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
 
-    // Clear interval on component unmount
-    return () => clearInterval(intervalId);
+    return () => {
+      webSocket.current.close();
+    };
   }, []);
 
   const handleDecision = async (decision) => {

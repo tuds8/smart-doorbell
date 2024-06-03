@@ -16,17 +16,37 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.doorbellapp",
+      "buildNumber": "1.0.0",
+      "config": {
+        "googleServicesFile": "./GoogleService-Info.plist"
+      }
     },
     "android": {
-      "permissions": ["INTERNET"], 
+      "permissions": ["INTERNET", "NOTIFICATIONS"],
+      "package": "com.yourcompany.doorbellapp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleServicesFile": "./google-services.json"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/notification-sound.wav"]
+        }
+      ]
+    ]
   }
 }
